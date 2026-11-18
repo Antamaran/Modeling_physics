@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 V0 = 0 #veritical velocity.
-V1=0 # horizontal velocity.
+V1 = 0 # horizontal velocity.
 T0 = 0
 H0 = 0 # initial height.
 I0 = 10 # initial impulse.
-AREA=1
+AREA = 1
 T_end = 100
 step = 0.0001
 drag_coeff = 2
@@ -14,7 +15,7 @@ G = 9.81
 M = 10
 
 def air_resistance(air_dens, velocity,drag_coeff,area):
-    return 0.5 * air_dens * velocity**2 *drag_coeff* area
+    return 0.5 * air_dens * velocity**2 * drag_coeff * area
 
 def differntial_velocity(mass, G, drag_coeff, air_dens, velocity, area):
     drag = air_resistance(air_dens, velocity, drag_coeff, area)
@@ -76,8 +77,43 @@ def plot(x,y):
     ax.plot(x,y)
     plt.show()
 
+def plot_directional_field(t_values, velocity_values):
+    t_min, t_max = min(t_values), max(t_values)
+    v_min, v_max = min(velocity_values), max(velocity_values)
+    v_padding = max(0.1 * (v_max - v_min), 1)
+
+    t_grid, v_grid = np.meshgrid(
+        np.linspace(t_min, t_max, 93),
+        np.linspace(v_min - v_padding, v_max + v_padding, 31)
+    )
+
+    dv_dt = np.array([
+        differntial_velocity(M, G, drag_coeff, air_dens, velocity, AREA)
+        for velocity in v_grid.ravel()
+    ]).reshape(v_grid.shape)
+
+    magnitude = np.sqrt(1 + dv_dt**2)
+    t_direction = 1 / magnitude
+    v_direction = dv_dt / magnitude
+
+    fig, ax = plt.subplots()
+    ax.quiver(
+        t_grid, v_grid, t_direction, v_direction,
+        angles="xy", scale_units="xy", scale=6,
+        color="tab:blue", alpha=0.85, width=0.0015,
+        headwidth=2.5, headlength=3, headaxislength=2.5
+    )
+    ax.plot(t_values, velocity_values, color="tab:red", linewidth=2, label="Euler solution")
+    ax.set_xlabel("Time t")
+    ax.set_ylabel("Velocity v")
+    ax.set_title("Directional field for dv/dt")
+    ax.grid(True)
+    ax.legend()
+    plt.show()
+
 def main():
     tX,tV, tH = euler_method(H0,I0,V0, T0, T_end, step, M, G, drag_coeff, air_dens, AREA, H0)
+    plot_directional_field(tX, tV)
     plot(tX, tV)
     plot(tX, tH)
 
