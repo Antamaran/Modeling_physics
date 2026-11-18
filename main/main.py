@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 V0 = 0 #veritical velocity.
 V1=0 # horizontal velocity.
 T0 = 0
-H0 = 0 # initial height.
+H0 = 1000 # initial height.
 I0 = 10 # initial impulse.
 AREA=1
 T_end = 100
@@ -57,7 +57,7 @@ def euler_method(H0,I0,V0, T0, T_end, step, M, G, drag_coeff, air_dens,area, hei
     height_coordinates.append(H0)
     
     
-    while time < T_end:
+    while (time < T_end and height>=0):
 
         velocity = euler_step_velocity(step, current_velocity, M, G, drag_coeff, air_dens, area)
         height =euler_step_height(step,current_velocity,height)
