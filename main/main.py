@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import math
 
 V0 = 0 #veritical velocity.
 V1=0 # horizontal velocity.
@@ -23,6 +24,9 @@ def differntial_velocity(mass, G, drag_coeff, air_dens, velocity, area):
         drag = -drag
 
     return drag / mass - G
+
+def terminal_velocity(mass, G, drag_coeff, air_dens, area):
+    return math.sqrt((2 * mass * G) / (air_dens * drag_coeff * area))
 
 def differntial_hieght(velocity):
     return velocity
@@ -76,11 +80,37 @@ def plot(x,y):
     ax.plot(x,y)
     plt.show()
 
+def analytical_velocity(time):
+    elapsed = time - T0
+    initial_velocity = V0 + I0 / M
+    terminal_speed = terminal_velocity(M, G, drag_coeff, air_dens, AREA)
+
+    # This assumes the initial velocity is upward or zero.
+    angle = math.atan(initial_velocity / terminal_speed)
+    rate = G / terminal_speed
+    time_to_apex = angle / rate
+
+    if elapsed < time_to_apex:
+        return terminal_speed * math.tan(angle - rate * elapsed)
+
+    return -terminal_speed * math.tanh(rate * (elapsed - time_to_apex))
 def main():
     tX,tV, tH = euler_method(H0,I0,V0, T0, T_end, step, M, G, drag_coeff, air_dens, AREA, H0)
     plot(tX, tV)
     plot(tX, tH)
+    expected_terminal_velocity = terminal_velocity(M, G, drag_coeff, air_dens, AREA)
+    print(f"Terminal velocity according to starting variables: {expected_terminal_velocity:.2f}")
 
+
+    #analytical solution. 
+    fig, ax = plt.subplots()
+    ax.plot(tX, tV, label="Euler")
+    ax.plot(tX, [analytical_velocity(t) for t in tX], "--", label="Analytical")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Vertical velocity (m/s)")
+    ax.legend()
+    plt.show()
+    
 
 
 if __name__ == "__main__":
