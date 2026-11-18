@@ -1,18 +1,19 @@
 import matplotlib.pyplot as plt
 
-V0 = 0
+V0 = 0 #veritical velocity.
+V1=0 # horizontal velocity.
 T0 = 0
 H0 = 0 # initial height.
 I0 = 10 # initial impulse.
 AREA=1
 T_end = 100
 step = 0.0001
-drag_coeff = 1
+drag_coeff = 2
 air_dens = 1
 G = 9.81
 M = 10
 
-def air_resistance(air_dens, velocity,drag_coeff,area):# more advanced air resistance.
+def air_resistance(air_dens, velocity,drag_coeff,area):
     return 0.5 * air_dens * velocity**2 *drag_coeff* area
 
 def differntial_velocity(mass, G, drag_coeff, air_dens, velocity, area):
@@ -26,7 +27,7 @@ def differntial_velocity(mass, G, drag_coeff, air_dens, velocity, area):
 def differntial_hieght(velocity):
     return velocity
 
-def euler_step_velocity(step, time, V_current, M, G, drag_coeff, air_dens, area):
+def euler_step_velocity(step, V_current, M, G, drag_coeff, air_dens, area):
     DvDt = differntial_velocity(M, G, drag_coeff, air_dens, V_current, area)
     V_current = V_current + DvDt * step
     
@@ -58,7 +59,7 @@ def euler_method(H0,I0,V0, T0, T_end, step, M, G, drag_coeff, air_dens,area, hei
     
     while time < T_end:
 
-        velocity = euler_step_velocity(step, time, current_velocity, M, G, drag_coeff, air_dens, area)
+        velocity = euler_step_velocity(step, current_velocity, M, G, drag_coeff, air_dens, area)
         height =euler_step_height(step,current_velocity,height)
         time=euler_step_time(step,time)
 
@@ -74,7 +75,6 @@ def plot(x,y):
     fig, ax = plt.subplots()
     ax.plot(x,y)
     plt.show()
-
 
 def main():
     tX,tV, tH = euler_method(H0,I0,V0, T0, T_end, step, M, G, drag_coeff, air_dens, AREA, H0)
