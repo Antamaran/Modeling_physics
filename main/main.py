@@ -14,6 +14,18 @@ air_dens = 1
 G = 9.81
 M = 10
 
+def analytical_solution(t, m, rho, Cd, A, V0, g=9.81):
+    k = (rho * Cd * A) / (2 * m)
+
+    D = (np.sqrt(g) + np.sqrt(k) * V0) / (np.sqrt(g) - np.sqrt(k) * V0)
+
+    v = np.sqrt(g / k) * (
+        (D * np.exp(2 * np.sqrt(g * k) * t) - 1) /
+        (D * np.exp(2 * np.sqrt(g * k) * t) + 1)
+    )
+
+    return -v
+
 def air_resistance(air_dens, velocity,drag_coeff,area):
     return 0.5 * air_dens * velocity**2 * drag_coeff * area
 
@@ -77,7 +89,7 @@ def plot(x,y):
     ax.plot(x,y)
     plt.show()
 
-def plot_directional_field(t_values, velocity_values):
+def plot_directional_field(t_values, velocity_values, ax):
     t_min, t_max = min(t_values), max(t_values)
     v_min, v_max = min(velocity_values), max(velocity_values)
     v_padding = max(0.1 * (v_max - v_min), 1)
@@ -96,26 +108,31 @@ def plot_directional_field(t_values, velocity_values):
     t_direction = 1 / magnitude
     v_direction = dv_dt / magnitude
 
-    fig, ax = plt.subplots()
     ax.quiver(
         t_grid, v_grid, t_direction, v_direction,
         angles="xy", scale_units="xy", scale=6,
         color="tab:blue", alpha=0.85, width=0.0015,
         headwidth=2.5, headlength=3, headaxislength=2.5
     )
-    ax.plot(t_values, velocity_values, color="tab:red", linewidth=2, label="Euler solution")
+
+def calculate_error(tV, tV_a):
+    return np.sqrt(np.sum((tV-tV_a)**2))/len(tV)
+
+def main():
+    tX,tV, tH = euler_method(H0,I0,V0, T0, T_end, step, M, G, drag_coeff, air_dens, AREA, H0)
+    tV_a = np.vectorize(analytical_solution, excluded="t")(np.linspace(T0, T_end, len(tV)), M, air_dens, drag_coeff, AREA, V0, G)
+    error = calculate_error(tV, tV_a)
+    print("The error is :", error)
+    fig, ax = plt.subplots()
+    plot_directional_field(tX, tV, ax)
+    ax.plot(tX, tV, color="tab:red", linewidth=2, label="Euler solution")
+    ax.plot(np.linspace(T0, T_end, len(tV)), tV_a, color="tab:blue", linewidth=2, label="Analytical solution")
     ax.set_xlabel("Time t")
     ax.set_ylabel("Velocity v")
     ax.set_title("Directional field for dv/dt")
     ax.grid(True)
     ax.legend()
     plt.show()
-
-def main():
-    tX,tV, tH = euler_method(H0,I0,V0, T0, T_end, step, M, G, drag_coeff, air_dens, AREA, H0)
-    plot_directional_field(tX, tV)
-    plot(tX, tV)
-    plot(tX, tH)
 
 
 
