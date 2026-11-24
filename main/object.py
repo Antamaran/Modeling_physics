@@ -2,12 +2,13 @@ import numpy as np
 
 
 class Object:
-    def __init__(self, volume, surface_area, mass, x=0, y=0, z=0):
+    def __init__(self, volume, surface_area, mass, x=0, y=0, z=0, vertical_velocity=0):
         self.volume = volume
         self.mass = mass
         self.x = x
         self.y = y
         self.z = z
+        self.vertical_velocity = vertical_velocity
         self.surface_area = np.asarray(surface_area, dtype=float)
         if self.surface_area.ndim != 3 or self.surface_area.shape[1:] != (3, 3): # if not one tirangle or not a mesh of traingles, raise error
             raise ValueError("surface_area must have shape (N, 3, 3)")
