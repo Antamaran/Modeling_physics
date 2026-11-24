@@ -1,13 +1,14 @@
 from matplotlib.pylab import eigh
 import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 if __package__:
     from .object import Object
 else:
     from object import Object
 
-V0 = 0 #veritical velocity.
+V0 = 0 #z-velocity.
 V1 = 0 # horizontal velocity.
 T0 = 0 # initial time.
 H0 = 1000 # initial height.
@@ -18,7 +19,10 @@ drag_coeff = 2
 air_dens = 1
 G = 9.81
 triangle_matrix = np.array([[[-1, 0, 0], [1, 0, 0], [0, 1, 0]]])
-FALLING_OBJECT = Object(volume=None, surface_area=triangle_matrix, mass=10)
+FALLING_OBJECT = Object(
+    volume=None, surface_area=triangle_matrix, mass=10, x=0, y=0, z=H0,
+    z_velocity=V0
+)
 P0=1.225 #kg/m^3, air density at sea water level.
 
 
@@ -149,29 +153,40 @@ def plot_directional_field(t_values, velocity_values, ax):
 def calculate_error(tV, tV_a):
     return np.sqrt(np.mean((np.asarray(tV) - tV_a) ** 2))
 
-def plot_position(time_values, height_values, body):
-    """Plot vertical Euler positions and horizontal motion at constant acceleration."""
-    elapsed_time = np.asarray(time_values) - time_values[0]
+def simulate_object(body, impulse, start_time, end_time, time_step):
+    """Record the trajectory and update the body to its final state."""
+    times, vertical_velocities, heights = euler_method(
+        body.z, impulse, body.z_velocity, start_time, end_time, time_step,
+        body.mass, G, P0, body.mesh_area, body.z, drag_coeff=drag_coeff
+    )
+    elapsed_time = np.asarray(times) - times[0]
     half_time_squared = 0.5 * elapsed_time**2
     x_positions = body.x + body.x_velocity * elapsed_time + body.x_acceleration * half_time_squared
     y_positions = body.y + body.y_velocity * elapsed_time + body.y_acceleration * half_time_squared
 
+    duration = times[-1] - times[0]
+    body.x, body.y, body.z = float(x_positions[-1]), float(y_positions[-1]), heights[-1]
+    body.x_velocity += body.x_acceleration * duration
+    body.y_velocity += body.y_acceleration * duration
+    body.z_velocity = vertical_velocities[-1]
+    return times, vertical_velocities, (x_positions, y_positions, heights)
+
+def plot_position(time_values, coordinates):
+    elapsed_time = np.asarray(time_values) - time_values[0]
     _, axes = plt.subplots(3, 1, sharex=True, figsize=(8, 7), layout="constrained")
     axes[0].set_title("Position over time")
     for axis, positions, label in zip(
-        axes, (x_positions, y_positions, height_values), ("x (m)", "y (m)", "z height (m)")
+        axes, coordinates, ("x (m)", "y (m)", "z height (m)")
     ):
         axis.plot(elapsed_time, positions)
         axis.set_ylabel(label)
         axis.grid(True)
     axes[-1].set_xlabel("Elapsed time (s)")
 
+
 def main():
     area = FALLING_OBJECT.mesh_area
-    tX, tV, tH = euler_method(
-        H0, I0, V0, T0, T_end, step, FALLING_OBJECT.mass, G, P0, area, H0,
-        drag_coeff=drag_coeff
-    )
+    tX, tV, coordinates = simulate_object(FALLING_OBJECT, I0, T0, T_end, step)
     tV_a = analytical_solution(
         np.asarray(tX) - tX[0], FALLING_OBJECT.mass, air_dens, drag_coeff,
         area, -tV[0], G
@@ -187,7 +202,7 @@ def main():
     ax.set_title("Directional field for dv/dt")
     ax.grid(True)
     ax.legend()
-    plot_position(tX, tH, FALLING_OBJECT)
+    plot_position(tX, coordinates)
     plt.show()
 
 
