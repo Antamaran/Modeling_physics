@@ -18,5 +18,8 @@ class World:
                 density, body.mesh_area
             )
             body.z = simulation.euler_step_height(dt, velocity, body.z)
+
+    def add_body(self,body):
+        self.bodies.append(body)
         
         

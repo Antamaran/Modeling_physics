@@ -149,6 +149,23 @@ def plot_directional_field(t_values, velocity_values, ax):
 def calculate_error(tV, tV_a):
     return np.sqrt(np.mean((np.asarray(tV) - tV_a) ** 2))
 
+def plot_position(time_values, height_values, body):
+    """Plot vertical Euler positions and horizontal motion at constant acceleration."""
+    elapsed_time = np.asarray(time_values) - time_values[0]
+    half_time_squared = 0.5 * elapsed_time**2
+    x_positions = body.x + body.x_velocity * elapsed_time + body.x_acceleration * half_time_squared
+    y_positions = body.y + body.y_velocity * elapsed_time + body.y_acceleration * half_time_squared
+
+    _, axes = plt.subplots(3, 1, sharex=True, figsize=(8, 7), layout="constrained")
+    axes[0].set_title("Position over time")
+    for axis, positions, label in zip(
+        axes, (x_positions, y_positions, height_values), ("x (m)", "y (m)", "z height (m)")
+    ):
+        axis.plot(elapsed_time, positions)
+        axis.set_ylabel(label)
+        axis.grid(True)
+    axes[-1].set_xlabel("Elapsed time (s)")
+
 def main():
     area = FALLING_OBJECT.mesh_area
     tX, tV, tH = euler_method(
@@ -170,6 +187,7 @@ def main():
     ax.set_title("Directional field for dv/dt")
     ax.grid(True)
     ax.legend()
+    plot_position(tX, tH, FALLING_OBJECT)
     plt.show()
 
 
