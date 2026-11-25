@@ -1,7 +1,4 @@
-if __package__:
-    from . import main as simulation
-else:
-    import main as simulation
+import main as simulation
 
 
 class World:

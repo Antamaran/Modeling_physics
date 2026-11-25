@@ -2,11 +2,7 @@ from matplotlib.pylab import eigh
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-
-if __package__:
-    from .object import Object
-else:
-    from object import Object
+from object import Object
 
 V0 = 0 #z-velocity.
 V1 = 0 # horizontal velocity.

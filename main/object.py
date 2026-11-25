@@ -29,11 +29,11 @@ class Object:
     def mesh_area(self):
         """Return the total area of the triangular faces."""
         vertices = self.surface_area
-        first_edges = vertices[:, 1] - vertices[:, 0] #AB
-        second_edges = vertices[:, 2] - vertices[:, 0] #AC
-        cross_products = np.cross(first_edges, second_edges) # gives areaof triangle as vector. 
-        return float(0.5 * np.linalg.norm(cross_products, axis=1).sum())
-
+        first_edges = vertices[:, 1] - vertices[:, 0] #AB of all triangles
+        second_edges = vertices[:, 2] - vertices[:, 0] #AC of all triangles
+        cross_products = np.cross(first_edges, second_edges) # |AB*AC|
+        return float(0.5 * np.linalg.norm(cross_products, axis=1).sum()) #||AB*AC||*0.5 sum. 
+    
     @property
     def apply_force(self, force): # theta is measured in respect to y=0. 
         force=force/self.mass
