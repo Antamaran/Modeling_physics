@@ -5,7 +5,8 @@ class Object:
     def __init__(self, volume, surface_area, mass, x=0, y=0, z=0, 
                  x_velocity=0, y_velocity=0,
                  z_velocity=0,x_acceleration=0,
-                 y_acceleration=0,z_acceleration=0):
+                 y_acceleration=0,z_acceleration=0, *, center_of_mass=(0, 0, 0),
+                 principal_moments=None, angular_velocity=(0, 0, 0)):
         self.volume = volume
         self.mass = mass
         self.x = x
@@ -19,6 +20,16 @@ class Object:
         self.x_acceleration=x_acceleration
         self.y_acceleration=y_acceleration
         self.z_acceleration=z_acceleration
+        # Center of mass in mesh coordinates (m), measured from the mesh origin.
+        self.center_of_mass = np.array(center_of_mass, dtype=float)
+        # Moments of inertia about the three body axes (kg m²). Larger values resist spin changes.
+        self.principal_moments = (
+            None if principal_moments is None else np.array(principal_moments, dtype=float)
+        )
+        self.angular_velocity = np.array(angular_velocity, dtype=float)  # world axes, rad/s
+        # Orientation rotates offsets from the center of mass into world axes.
+        # np.eye(3) creates a 3×3 identity matrix, so both sets of axes start aligned.
+        self.orientation = np.eye(3)
 
         self.surface_area = np.asarray(surface_area, dtype=float)
 
