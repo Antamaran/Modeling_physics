@@ -216,11 +216,12 @@ def simulate_spinning_fall(body, impulse, start_time, end_time, time_step):
 
     # An area vector points along the face normal and has length equal to the face area.
     triangles = body.surface_area
-    area_vectors = 0.5 * np.cross(triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0])
-    # Sample each face halfway from its centroid to each vertex. Each sample represents
-    # a third of the area, and its distance from the center of mass affects the local airflow.
-    sample_offsets = ((triangles + triangles.mean(axis=1, keepdims=True)) / 2
-                      - body.center_of_mass).reshape(-1, 3)
+    area_vectors = 0.5 * np.cross(triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0]) # surface area.
+
+
+    centroids = triangles.mean(axis=1, keepdims=True) # mean of each triangle.
+    sample_position=triangle_matrix+centroids/2 # distance halfway between each vertex. So point in which drag acts
+    sample_offsets = (sample_position - body.center_of_mass).reshape(-1, 3) # -com, to transform com to origin. 
     sample_area_vectors = np.repeat(area_vectors / 3, 3, axis=0)
 
     # Track the center of mass and apply the initial upward impulse as a velocity change.
