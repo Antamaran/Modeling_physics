@@ -1,10 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-if __package__:
-    from .object import Object
-else:
-    from object import Object
+from object import Object
+
 
 V0 = 0 #veritical velocity.
 V1 = 0 # horizontal velocity.
