@@ -27,9 +27,8 @@ class Object:
             None if principal_moments is None else np.array(principal_moments, dtype=float)
         )
         self.angular_velocity = np.array(angular_velocity, dtype=float)  # world axes, rad/s
-        # Orientation rotates offsets from the center of mass into world axes.
-        # np.eye(3) creates a 3×3 identity matrix, so both sets of axes start aligned.
-        self.orientation = np.eye(3)
+        
+        self.orientation = np.eye(3) # identity matrix
 
         self.surface_area = np.asarray(surface_area, dtype=float)
 
